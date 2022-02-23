@@ -9,32 +9,44 @@ import (
 	"github.com/hashicorp/go-hclog"
 )
 
+// constructs a new logger
+// loglevel is Error if build and info if `go run`
+// std lib logging is redirected
 func New(name string, opts ...LoggerOpt) *Logger {
-	log = &Logger{name: name}
+	actLog = &Logger{name: name}
 	for _, opt := range opts {
-		opt(log)
+		opt(actLog)
 	}
-	if log.w == nil {
-		log.SetWriter(os.Stderr)
+	if actLog.w == nil {
+		actLog.SetWriter(os.Stderr)
 	}
-	return log
+	if actLog.level == hclog.NoLevel {
+		actLog.level = hclog.Warn
+		if IsGoRun() {
+			actLog.level = hclog.Info
+		}
+	}
+	return actLog
 }
 
+//Sets the write to this logger and redirects the std lib log
 func (l *Logger) SetWriter(w io.Writer) {
-	log.Logger = hclog.New(&hclog.LoggerOptions{
+	actLog.Logger = hclog.New(&hclog.LoggerOptions{
 		Name:       l.name,
 		TimeFormat: time.RFC3339,
 		Output:     w,
+		Level:      l.level,
 	})
-	log.w = log.StandardWriter(&hclog.StandardLoggerOptions{InferLevels: true})
+	actLog.w = actLog.StandardWriter(&hclog.StandardLoggerOptions{InferLevels: true})
 
-	gologger.SetOutput(log.w)
+	gologger.SetOutput(actLog.w)
 	gologger.SetPrefix("")
 	gologger.SetFlags(0)
 }
 
 type LoggerOpt func(*Logger)
 
+// Used to create a logger with a custom writer
 func WithWriter(w io.Writer) LoggerOpt {
 	return func(l *Logger) {
 		l.SetWriter(w)

@@ -25,8 +25,8 @@ func (tw *testWriter) Line() string {
 func TestDefault(t *testing.T) {
 	var buf testWriter
 	initDefaultLogger()
-	log.SetWriter(&buf)
-	log.SetLevel(hclog.Trace)
+	actLog.SetWriter(&buf)
+	actLog.SetLevel(hclog.Trace)
 	Printf("text to output: %s %d", "string", 42)
 	assert.Equal(t, "[INFO]  go-hcl: text to output: string 42\n", buf.Line())
 	Print("text to output")
@@ -34,7 +34,7 @@ func TestDefault(t *testing.T) {
 	Println("text to output")
 	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
 
-	Log(hclog.Debug, "text to output")
+	log(hclog.Debug, "text to output")
 	assert.Equal(t, "[DEBUG] go-hcl: text to output\n", buf.Line())
 	Trace("text to output")
 	assert.Equal(t, "[TRACE] go-hcl: text to output\n", buf.Line())
