@@ -3,7 +3,7 @@ hcl is a replacement for log which wraps hc-log
 it does not support Fatal or Panic function
 
 ```go
-ppackage main
+package main
 
 import "github.com/vogtp/go-hcl"
 
