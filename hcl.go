@@ -1,5 +1,5 @@
 // hcl is a replacement for log which wraps hc-log
-// in does not support Fatal or Panic function
+// it does not support Fatal or Panic function
 package hcl
 
 import (
