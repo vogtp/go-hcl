@@ -46,52 +46,32 @@ func Log(level hclog.Level, msg string, args ...interface{}) {
 		log.Log(level, msg)
 		return
 	}
-	log.Log(level, msg, args)
+	log.Log(level, msg, args...)
 }
 
 // Emit a message and key/value pairs at the TRACE level
 func Trace(msg string, args ...interface{}) {
-	if len(args) < 1 {
-		log.Trace(msg)
-		return
-	}
-	log.Trace(msg, args)
+	Log(hclog.Trace, msg, args...)
 }
 
 // Emit a message and key/value pairs at the DEBUG level
 func Debug(msg string, args ...interface{}) {
-	if len(args) < 1 {
-		log.Debug(msg)
-		return
-	}
-	log.Debug(msg, args)
+	Log(hclog.Debug, msg, args...)
 }
 
 // Emit a message and key/value pairs at the INFO level
 func Info(msg string, args ...interface{}) {
-	if len(args) < 1 {
-		log.Info(msg)
-		return
-	}
-	log.Info(msg, args)
+	Log(hclog.Info, msg, args...)
 }
 
 // Emit a message and key/value pairs at the WARN level
 func Warn(msg string, args ...interface{}) {
-	if len(args) < 1 {
-		log.Warn(msg)
-		return
-	}
-	log.Warn(msg, args)
+	Log(hclog.Warn, msg, args...)
 }
 
 // Emit a message and key/value pairs at the ERROR level
 func Error(msg string, args ...interface{}) {
-	if len(args) < 1 {
-		log.Error(msg)
-		return
-	}
-	log.Error(msg, args)
+	Log(hclog.Error, msg, args...)
 }
 
 // Indicate if TRACE logs would be emitted. This and the other Is* guards

@@ -3,6 +3,7 @@ package hcl
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -132,4 +133,21 @@ func TestStdLibCompat(t *testing.T) {
 	Println("text to output")
 	assert.Equal(t, "[INFO]  test-logger: text to output\n", buf.Line())
 
+}
+
+func TestExecCheck(t *testing.T) {
+	arg := os.Args[0]
+	defer func() { os.Args[0] = arg }()
+	os.Args[0] = "/test/tmp/go-build2932332730/b001/go-hcl.test"
+	assert.True(t, IsGoRun())
+
+	os.Args[0] = "/test/tmp/b001/go-hcl.test"
+	assert.False(t, IsGoRun())
+
+	l := New("")
+	os.Args[0] = "/test/tmp/go-build2932332730/b001/go-hcl.test"
+	assert.True(t, l.IsGoRun())
+
+	os.Args[0] = "/bin/exe"
+	assert.False(t, l.IsGoRun())
 }
