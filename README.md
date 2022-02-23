@@ -18,7 +18,7 @@ func main() {
 Output: 
 
 ```
-2022-02-23T15:48:19+01:00 [INFO]  hcltests: Hello HCL
-2022-02-23T15:48:19+01:00 [INFO]  hcltests: Hello HCL
-2022-02-23T15:48:19+01:00 [ERROR] hcltests: I am getting bored
+2022-02-23T15:48:19+01:00 [INFO]  executable-name: Hello HCL
+2022-02-23T15:48:19+01:00 [INFO]  executable-name: Hello HCL
+2022-02-23T15:48:19+01:00 [ERROR] executable-name: I am getting bored
 ```

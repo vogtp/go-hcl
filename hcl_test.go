@@ -2,6 +2,7 @@ package hcl
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -18,18 +19,6 @@ func (tw *testWriter) Line() string {
 	dataIdx := strings.IndexByte(str, ' ')
 	tw.Reset()
 	return str[dataIdx+1:]
-}
-
-func TestInit(t *testing.T) {
-	var buf testWriter
-	l := New("test")
-	l.SetWriter(&buf)
-	l.Error("log line")
-	assert.Equal(t, "[ERROR] test: log line\n", buf.Line())
-	log.Print("std log")
-	assert.Equal(t, "[INFO]  test: std log\n", buf.Line())
-	Print("std log")
-	assert.Equal(t, "[INFO]  test: std log\n", buf.Line())
 }
 
 func TestDefault(t *testing.T) {
@@ -58,29 +47,83 @@ func TestDefault(t *testing.T) {
 	assert.Equal(t, "[ERROR] go-hcl: text to output\n", buf.Line())
 }
 
+type outFunc func(msg string, args ...interface{})
+type isFunc func() bool
+
+var buf testWriter
+
+func parseLine(l string) (prefix, line string) {
+	idx := strings.Index(l, "]")
+	prefix = l[1:idx]
+	line = l[idx+1:]
+	line = strings.TrimLeft(line, " ")
+	return prefix, line
+}
+
+func checkLevel(t *testing.T, tc logTestCase, logName string, level hclog.Level, out outFunc, is isFunc) {
+	active := tc.level <= level
+	assert.Equal(t, active, is(), "level is not active")
+
+	prefix := strings.ToUpper(level.String())
+	out("text to output")
+	if !active {
+		assert.Equal(t, 0, buf.Len(), "no output expected")
+		return
+	}
+	p, l := parseLine(buf.Line())
+	exp := fmt.Sprintf("%s: text to output\n", logName)
+	assert.Equal(t, prefix, p, "wong prefix")
+	assert.Equal(t, exp, l, "logline is wrong")
+
+	out("text to output", "strParam", "someParam", "intParam", 42)
+	p, l = parseLine(buf.Line())
+	exp = fmt.Sprintf("%s: text to output: strParam=someParam intParam=42\n", logName)
+	assert.Equal(t, prefix, p, "wong prefix (with params)")
+	assert.Equal(t, exp, l, "logline is wrong (with params")
+}
+
+type logTestCase struct {
+	level hclog.Level
+}
+
 func TestLogger(t *testing.T) {
-	var buf testWriter
-	l := New("test-logger", WithWriter(&buf))
-	l.SetLevel(hclog.Trace)
+	tt := []logTestCase{
+		{hclog.Trace},
+		{hclog.Debug},
+		{hclog.Info},
+		{hclog.Warn},
+		{hclog.Error},
+	}
+	logName := "test-logger"
+	l := New(logName, WithWriter(&buf))
+	for _, tc := range tt {
+		t.Run(tc.level.String(), func(t *testing.T) {
+			l.SetLevel(tc.level)
+			// test package functions
+			checkLevel(t, tc, logName, hclog.Error, Error, IsError)
+			checkLevel(t, tc, logName, hclog.Warn, Warn, IsWarn)
+			checkLevel(t, tc, logName, hclog.Info, Info, IsInfo)
+			checkLevel(t, tc, logName, hclog.Debug, Debug, IsDebug)
+			checkLevel(t, tc, logName, hclog.Trace, Trace, IsTrace)
+			// test logger funtions
+			checkLevel(t, tc, logName, hclog.Error, l.Error, l.IsError)
+			checkLevel(t, tc, logName, hclog.Warn, l.Warn, l.IsWarn)
+			checkLevel(t, tc, logName, hclog.Info, l.Info, l.IsInfo)
+			checkLevel(t, tc, logName, hclog.Debug, l.Debug, l.IsDebug)
+			checkLevel(t, tc, logName, hclog.Trace, l.Trace, l.IsTrace)
+		})
+	}
+}
+
+func TestStdLibCompat(t *testing.T) {
+	logName := "test-logger"
+	l := New(logName, WithWriter(&buf))
 	l.Printf("text to output: %s %d", "string", 42)
 	assert.Equal(t, "[INFO]  test-logger: text to output: string 42\n", buf.Line())
 	l.Print("text to output")
 	assert.Equal(t, "[INFO]  test-logger: text to output\n", buf.Line())
 	l.Println("text to output")
 	assert.Equal(t, "[INFO]  test-logger: text to output\n", buf.Line())
-
-	l.Log(hclog.Debug, "text to output")
-	assert.Equal(t, "[DEBUG] test-logger: text to output\n", buf.Line())
-	l.Trace("text to output")
-	assert.Equal(t, "[TRACE] test-logger: text to output\n", buf.Line())
-	l.Debug("text to output")
-	assert.Equal(t, "[DEBUG] test-logger: text to output\n", buf.Line())
-	l.Info("text to output")
-	assert.Equal(t, "[INFO]  test-logger: text to output\n", buf.Line())
-	l.Warn("text to output")
-	assert.Equal(t, "[WARN]  test-logger: text to output\n", buf.Line())
-	l.Error("text to output")
-	assert.Equal(t, "[ERROR] test-logger: text to output\n", buf.Line())
 
 	Printf("text to output: %s %d", "string", 42)
 	assert.Equal(t, "[INFO]  test-logger: text to output: string 42\n", buf.Line())
@@ -89,42 +132,4 @@ func TestLogger(t *testing.T) {
 	Println("text to output")
 	assert.Equal(t, "[INFO]  test-logger: text to output\n", buf.Line())
 
-	Log(hclog.Debug, "text to output")
-	assert.Equal(t, "[DEBUG] test-logger: text to output\n", buf.Line())
-	Trace("text to output")
-	assert.Equal(t, "[TRACE] test-logger: text to output\n", buf.Line())
-	Debug("text to output")
-	assert.Equal(t, "[DEBUG] test-logger: text to output\n", buf.Line())
-	Info("text to output")
-	assert.Equal(t, "[INFO]  test-logger: text to output\n", buf.Line())
-	Warn("text to output")
-	assert.Equal(t, "[WARN]  test-logger: text to output\n", buf.Line())
-	Error("text to output")
-	assert.Equal(t, "[ERROR] test-logger: text to output\n", buf.Line())
-}
-
-func TestLevel(t *testing.T) {
-	tt := []hclog.Level{
-		hclog.Trace,
-		hclog.Debug,
-		hclog.Info,
-		hclog.Warn,
-		hclog.Error,
-	}
-	l := New("test-logger")
-	for _, tc := range tt {
-		t.Run(tc.String(), func(t *testing.T) {
-			l.SetLevel(tc)
-			assert.Equal(t, tc <= hclog.Trace, l.IsTrace())
-			assert.Equal(t, tc <= hclog.Debug, l.IsDebug())
-			assert.Equal(t, tc <= hclog.Info, l.IsInfo())
-			assert.Equal(t, tc <= hclog.Warn, l.IsWarn())
-			assert.Equal(t, tc <= hclog.Error, l.IsError())
-			assert.Equal(t, tc <= hclog.Trace, IsTrace())
-			assert.Equal(t, tc <= hclog.Debug, IsDebug())
-			assert.Equal(t, tc <= hclog.Info, IsInfo())
-			assert.Equal(t, tc <= hclog.Warn, IsWarn())
-			assert.Equal(t, tc <= hclog.Error, IsError())
-		})
-	}
 }
