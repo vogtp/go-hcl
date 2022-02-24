@@ -1,6 +1,7 @@
 package hcl
 
 import (
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -24,4 +25,22 @@ func IsGoRun() bool {
 
 func (Logger) IsGoRun() bool {
 	return IsGoRun()
+}
+
+func GetExecutableName() string {
+	a := os.Args[0]
+	sL := strings.LastIndex(a, "/")
+	sW := strings.LastIndex(a, "\\")
+	s := int(math.Max(float64(sL), float64(sW)))
+	e := strings.LastIndex(a, ".")
+	if s < 0 {
+		s = 0
+	}
+	if e < s {
+		e = len(a)
+	}
+	if s+e < 1 {
+		return ""
+	}
+	return a[s+1 : e]
 }

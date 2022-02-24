@@ -3,9 +3,6 @@
 package hcl
 
 import (
-	"os"
-	"strings"
-
 	"github.com/hashicorp/go-hclog"
 )
 
@@ -13,13 +10,7 @@ var actLog *Logger
 
 // inits a logger with the binary name
 func initDefaultLogger() {
-	a := os.Args[0]
-	s := strings.LastIndex(a, "/")
-	e := strings.LastIndex(a, ".")
-	if e < s {
-		e = len(a)
-	}
-	New(a[s+1 : e])
+	New(GetExecutableName())
 }
 
 func init() {

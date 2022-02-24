@@ -135,7 +135,7 @@ func TestStdLibCompat(t *testing.T) {
 
 }
 
-func TestExecCheck(t *testing.T) {
+func TestIsGoRun(t *testing.T) {
 	arg := os.Args[0]
 	defer func() { os.Args[0] = arg }()
 	tests := []struct {
@@ -148,7 +148,7 @@ func TestExecCheck(t *testing.T) {
 		{"/bin/exe", false},
 		{"./main.go", false},
 		{`c:\Users\Administrator\some.exe`, false},
-		{`c:\Users\Administrator\AppData\Local\Temp\go-build607140747/b001/go-hcl.test`, true},
+		{`c:\Users\Administrator\AppData\Local\Temp\go-build607140747/b001/go-hcl.exe`, true},
 		{`/test/gogo-build/someThing`, false},
 		{`c:\Temp\thisgo-build\a.exe`, false},
 		{`c:\Temp\this\go-build\a.exe`, false},
@@ -161,6 +161,35 @@ func TestExecCheck(t *testing.T) {
 
 			os.Args[0] = tc.arg0
 			assert.Equal(t, tc.goRun, IsGoRun())
+		})
+	}
+}
+
+func TestGetExecutableName(t *testing.T) {
+	arg := os.Args[0]
+	defer func() { os.Args[0] = arg }()
+	tests := []struct {
+		arg0 string
+		name string
+	}{
+		{"/test/tmp/go-build2932332730/b001/go-hcl.test", "go-hcl"},
+		{"/test/tmp/b001/go-hcl.test", "go-hcl"},
+		{"/test/tmp/go-build/2932332730/b001/go-hcl.test", "go-hcl"},
+		{"/bin/exe", "exe"},
+		{"./main.go", "main"},
+		{`c:\Users\Administrator\some.exe`, "some"},
+		{`c:\Users\Administrator\AppData\Local\Temp\go-build607140747/b001/go-hcl.exe`, "go-hcl"},
+		{`/test/gogo-build/someThing`, "someThing"},
+		{`c:\Temp\thisgo-build\a.exe`, "a"},
+		{`\\go-build-server\someshare`, "someshare"},
+		{``, ""},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.arg0, func(t *testing.T) {
+
+			os.Args[0] = tc.arg0
+			assert.Equal(t, tc.name, GetExecutableName())
 		})
 	}
 }
