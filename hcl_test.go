@@ -214,6 +214,7 @@ func TestIsGoRun(t *testing.T) {
 		{`/test/gogo-build/someThing`, false},
 		{`c:\Temp\thisgo-build\a.exe`, false},
 		{`c:\Temp\this\go-build\a.exe`, false},
+		{`c:\Temp\this\go-build\a.exe.test`, false},
 		{`\\go-build-server\someshare`, false},
 		{``, false},
 	}
@@ -240,6 +241,7 @@ func TestIsGoTest(t *testing.T) {
 		{"exe.text", false},
 		{"exe.test", true},
 		{"/test/tmp/go-build2932332730/b001/go-hcl", false},
+		{"/test/tmp/go-build2932332730/b001/__debug_bin", true},
 		{"/test/tmp/go-build2932332730/b001/go-hcl.test", true},
 		{"/test/tmp/b001/go-hcl", false},
 		{"/test/tmp/go-build/2932332730/b001/go-hcl", false},
@@ -251,6 +253,7 @@ func TestIsGoTest(t *testing.T) {
 		{`c:\Users\Administrator\AppData\Local\Temp\go-build607140747/b001/go-hcl.test`, true},
 		{`/test/gogo-build/someThing`, false},
 		{`c:\Temp\thisgo-build\a.exe`, false},
+		{`c:\Temp\thisgo-build\a..test.exe`, true},
 		{`c:\Temp\this\go-build\a.exe`, false},
 		{`\\go-build-server\someshare`, false},
 		{``, false},
