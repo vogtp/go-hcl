@@ -138,16 +138,29 @@ func TestStdLibCompat(t *testing.T) {
 func TestExecCheck(t *testing.T) {
 	arg := os.Args[0]
 	defer func() { os.Args[0] = arg }()
-	os.Args[0] = "/test/tmp/go-build2932332730/b001/go-hcl.test"
-	assert.True(t, IsGoRun())
+	tests := []struct {
+		arg0  string
+		goRun bool
+	}{
+		{"/test/tmp/go-build2932332730/b001/go-hcl.test", true},
+		{"/test/tmp/b001/go-hcl.test", false},
+		{"/test/tmp/go-build/2932332730/b001/go-hcl.test", false},
+		{"/bin/exe", false},
+		{"./main.go", false},
+		{`c:\Users\Administrator\some.exe`, false},
+		{`c:\Users\Administrator\AppData\Local\Temp\go-build607140747/b001/go-hcl.test`, true},
+		{`/test/gogo-build/someThing`, false},
+		{`c:\Temp\thisgo-build\a.exe`, false},
+		{`c:\Temp\this\go-build\a.exe`, false},
+		{`\\go-build-server\someshare`, false},
+		{``, false},
+	}
 
-	os.Args[0] = "/test/tmp/b001/go-hcl.test"
-	assert.False(t, IsGoRun())
+	for _, tc := range tests {
+		t.Run(tc.arg0, func(t *testing.T) {
 
-	l := New("")
-	os.Args[0] = "/test/tmp/go-build2932332730/b001/go-hcl.test"
-	assert.True(t, l.IsGoRun())
-
-	os.Args[0] = "/bin/exe"
-	assert.False(t, l.IsGoRun())
+			os.Args[0] = tc.arg0
+			assert.Equal(t, tc.goRun, IsGoRun())
+		})
+	}
 }
