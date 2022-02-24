@@ -3,6 +3,8 @@
 package hcl
 
 import (
+	"io"
+
 	"github.com/hashicorp/go-hclog"
 )
 
@@ -93,4 +95,9 @@ func IsWarn() bool {
 // Indicate if ERROR logs would be emitted. This and the other Is* guards
 func IsError() bool {
 	return actLog.IsError()
+}
+
+// return a writer to used for frameworks to output to log
+func GetWriter() io.Writer {
+	return actLog.GetWriter()
 }

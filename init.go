@@ -44,9 +44,14 @@ func (l *Logger) SetWriter(w io.Writer) {
 	})
 	actLog.w = w
 
-	gologger.SetOutput(actLog.w)
+	gologger.SetOutput(l.GetWriter())
 	gologger.SetPrefix("")
 	gologger.SetFlags(0)
+}
+
+// return a writer to used for frameworks to output to log
+func (l *Logger) GetWriter() io.Writer {
+	return l.StandardWriter(&hclog.StandardLoggerOptions{InferLevels: true})
 }
 
 type LoggerOpt func(*Logger)

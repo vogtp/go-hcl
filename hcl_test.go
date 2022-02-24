@@ -3,6 +3,7 @@ package hcl
 import (
 	"bytes"
 	"fmt"
+	gologger "log"
 	"os"
 	"strings"
 	"testing"
@@ -61,11 +62,11 @@ func parseLine(l string) (prefix, line string) {
 	return prefix, line
 }
 
-func checkLevel(t *testing.T, tc logTestCase, logName string, level hclog.Level, out outFunc, is isFunc) {
-	active := tc.level <= level
+func checkLevel(t *testing.T, tcLevel hclog.Level, logName string, checkLevel hclog.Level, out outFunc, is isFunc) {
+	active := tcLevel <= checkLevel
 	assert.Equal(t, active, is(), "level is not active")
 
-	prefix := strings.ToUpper(level.String())
+	prefix := strings.ToUpper(checkLevel.String())
 	out("text to output")
 	if !active {
 		assert.Equal(t, 0, buf.Len(), "no output expected")
@@ -85,23 +86,19 @@ func checkLevel(t *testing.T, tc logTestCase, logName string, level hclog.Level,
 	assert.Equal(t, exp, l, "logline is wrong (with params", line)
 }
 
-type logTestCase struct {
-	level hclog.Level
-}
-
-func TestLogger(t *testing.T) {
-	tt := []logTestCase{
-		{hclog.Trace},
-		{hclog.Debug},
-		{hclog.Info},
-		{hclog.Warn},
-		{hclog.Error},
+func TestLogLevel(t *testing.T) {
+	tt := []hclog.Level{
+		hclog.Trace,
+		hclog.Debug,
+		hclog.Info,
+		hclog.Warn,
+		hclog.Error,
 	}
 	logName := "test-logger"
 	l := New(logName, WithWriter(&buf))
 	for _, tc := range tt {
-		t.Run(tc.level.String(), func(t *testing.T) {
-			l.SetLevel(tc.level)
+		t.Run(tc.String(), func(t *testing.T) {
+			l.SetLevel(tc)
 			// test package functions
 			checkLevel(t, tc, logName, hclog.Error, Error, IsError)
 			checkLevel(t, tc, logName, hclog.Warn, Warn, IsWarn)
@@ -114,6 +111,46 @@ func TestLogger(t *testing.T) {
 			checkLevel(t, tc, logName, hclog.Info, l.Info, l.IsInfo)
 			checkLevel(t, tc, logName, hclog.Debug, l.Debug, l.IsDebug)
 			checkLevel(t, tc, logName, hclog.Trace, l.Trace, l.IsTrace)
+		})
+	}
+}
+
+type logTestCase struct {
+	name      string
+	expLevel  hclog.Level
+	arg0      string
+	test, run bool
+}
+
+func TestLogger(t *testing.T) {
+	arg := os.Args[0]
+	defer func() { os.Args[0] = arg }()
+	tt := []logTestCase{
+		{"Build/Production", hclog.Warn, "exe", false, false},
+		{"go run", hclog.Info, "/test/tmp/go-build2932332730/b001/go-hcl", false, true},
+		{"go test", hclog.Debug, "exe.test", true, false},
+	}
+	logName := "test-logger"
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			os.Args[0] = tc.arg0
+			l := New(logName, WithWriter(&buf))
+			// test package functions
+			assert.Equal(t, tc.test, l.IsGoTest())
+			assert.Equal(t, tc.run, l.IsGoRun())
+			checkLevel(t, tc.expLevel, logName, hclog.Error, Error, IsError)
+			checkLevel(t, tc.expLevel, logName, hclog.Warn, Warn, IsWarn)
+			checkLevel(t, tc.expLevel, logName, hclog.Info, Info, IsInfo)
+			checkLevel(t, tc.expLevel, logName, hclog.Debug, Debug, IsDebug)
+			checkLevel(t, tc.expLevel, logName, hclog.Trace, Trace, IsTrace)
+			// test logger funtions
+			assert.Equal(t, tc.test, IsGoTest())
+			assert.Equal(t, tc.run, IsGoRun())
+			checkLevel(t, tc.expLevel, logName, hclog.Error, l.Error, l.IsError)
+			checkLevel(t, tc.expLevel, logName, hclog.Warn, l.Warn, l.IsWarn)
+			checkLevel(t, tc.expLevel, logName, hclog.Info, l.Info, l.IsInfo)
+			checkLevel(t, tc.expLevel, logName, hclog.Debug, l.Debug, l.IsDebug)
+			checkLevel(t, tc.expLevel, logName, hclog.Trace, l.Trace, l.IsTrace)
 		})
 	}
 }
@@ -133,6 +170,13 @@ func TestStdLibCompat(t *testing.T) {
 	Print("text to output")
 	assert.Equal(t, "[INFO]  test-logger: text to output\n", buf.Line())
 	Println("text to output")
+	assert.Equal(t, "[INFO]  test-logger: text to output\n", buf.Line())
+
+	gologger.Printf("text to output: %s %d", "string", 42)
+	assert.Equal(t, "[INFO]  test-logger: text to output: string 42\n", buf.Line())
+	gologger.Print("text to output")
+	assert.Equal(t, "[INFO]  test-logger: text to output\n", buf.Line())
+	gologger.Println("text to output")
 	assert.Equal(t, "[INFO]  test-logger: text to output\n", buf.Line())
 
 }
@@ -182,6 +226,8 @@ func TestIsGoTest(t *testing.T) {
 		arg0 string
 		exp  bool
 	}{
+		{"exe.text", false},
+		{"exe.test", true},
 		{"/test/tmp/go-build2932332730/b001/go-hcl", false},
 		{"/test/tmp/go-build2932332730/b001/go-hcl.test", true},
 		{"/test/tmp/b001/go-hcl", false},
