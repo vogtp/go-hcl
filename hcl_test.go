@@ -47,6 +47,17 @@ func TestDefault(t *testing.T) {
 	assert.Equal(t, "[WARN]  go-hcl: text to output\n", buf.Line())
 	Error("text to output")
 	assert.Equal(t, "[ERROR] go-hcl: text to output\n", buf.Line())
+
+	Tracef("text to output: %s", "test string")
+	assert.Equal(t, "[TRACE] go-hcl: text to output: test string\n", buf.Line())
+	Debugf("text to output: %s", "test string")
+	assert.Equal(t, "[DEBUG] go-hcl: text to output: test string\n", buf.Line())
+	Infof("text to output: %s", "test string")
+	assert.Equal(t, "[INFO]  go-hcl: text to output: test string\n", buf.Line())
+	Warnf("text to output: %s", "test string")
+	assert.Equal(t, "[WARN]  go-hcl: text to output: test string\n", buf.Line())
+	Errorf("text to output: %s", "test string")
+	assert.Equal(t, "[ERROR] go-hcl: text to output: test string\n", buf.Line())
 }
 
 type outFunc func(msg string, args ...interface{})

@@ -19,6 +19,26 @@ func init() {
 	initDefaultLogger()
 }
 
+func Errorf(format string, v ...interface{}) {
+	actLog.Errorf(format, v...)
+}
+
+func Warnf(format string, v ...interface{}) {
+	actLog.Warnf(format, v...)
+}
+
+func Infof(format string, v ...interface{}) {
+	actLog.Infof(format, v...)
+}
+
+func Debugf(format string, v ...interface{}) {
+	actLog.Debugf(format, v...)
+}
+
+func Tracef(format string, v ...interface{}) {
+	actLog.Tracef(format, v...)
+}
+
 // Printf like in std lib
 func Printf(format string, v ...interface{}) {
 	actLog.Printf(format, v...)

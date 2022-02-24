@@ -18,6 +18,26 @@ type Logger struct {
 	name  string
 }
 
+func (l *Logger) Errorf(format string, v ...interface{}) {
+	l.Logger.Error(fmt.Sprintf(format, v...))
+}
+
+func (l *Logger) Warnf(format string, v ...interface{}) {
+	l.Logger.Warn(fmt.Sprintf(format, v...))
+}
+
+func (l *Logger) Infof(format string, v ...interface{}) {
+	l.Logger.Info(fmt.Sprintf(format, v...))
+}
+
+func (l *Logger) Debugf(format string, v ...interface{}) {
+	l.Logger.Debug(fmt.Sprintf(format, v...))
+}
+
+func (l *Logger) Tracef(format string, v ...interface{}) {
+	l.Logger.Trace(fmt.Sprintf(format, v...))
+}
+
 func (l *Logger) Printf(format string, v ...interface{}) {
 	l.Logger.Info(fmt.Sprintf(format, v...))
 }
