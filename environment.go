@@ -35,6 +35,9 @@ func IsGoTest() bool {
 	if strings.HasSuffix(a, ".test") {
 		return true
 	}
+	if strings.HasSuffix(a, ".test.exe") {
+		return true
+	}
 	if strings.HasSuffix(a, "__debug_bin") {
 		return true
 	}
@@ -54,11 +57,16 @@ func GetExecutableName() string {
 	if s < 0 {
 		s = 0
 	}
-	if e < s {
+	if e < s || s+1 == e {
 		e = len(a)
 	}
 	if s+e < 1 {
 		return ""
 	}
-	return a[s+1 : e]
+	n := a[s+1 : e]
+	e = strings.LastIndex(n, ".")
+	if e < 2 {
+		return n
+	}
+	return n[:e]
 }

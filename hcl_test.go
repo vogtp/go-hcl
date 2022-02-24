@@ -219,12 +219,18 @@ func TestGetExecutableName(t *testing.T) {
 		{"/test/tmp/b001/go-hcl.test", "go-hcl"},
 		{"/test/tmp/go-build/2932332730/b001/go-hcl.test", "go-hcl"},
 		{"/bin/exe", "exe"},
+		{"/bin/.exe", ".exe"},
+		{"/bin/.exe.ext", ".exe"},
+		{"/bin/exe.ext", "exe"},
 		{"./main.go", "main"},
 		{`c:\Users\Administrator\some.exe`, "some"},
+		{`c:\Users\Administrator\.some.exe`, ".some"},
+		{`c:\Users\Administrator\.some`, ".some"},
 		{`c:\Users\Administrator\AppData\Local\Temp\go-build607140747/b001/go-hcl.exe`, "go-hcl"},
 		{`/test/gogo-build/someThing`, "someThing"},
 		{`c:\Temp\thisgo-build\a.exe`, "a"},
 		{`\\go-build-server\someshare`, "someshare"},
+		{`./exe`, "exe"},
 		{``, ""},
 	}
 
