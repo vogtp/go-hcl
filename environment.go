@@ -8,6 +8,9 @@ import (
 )
 
 func IsGoRun() bool {
+	if IsGoTest() {
+		return false
+	}
 	a := os.Args[0]
 	i := strings.Index(a, "go-build")
 	if i == -1 {
@@ -25,6 +28,21 @@ func IsGoRun() bool {
 
 func (Logger) IsGoRun() bool {
 	return IsGoRun()
+}
+
+func IsGoTest() bool {
+	a := os.Args[0]
+	if strings.HasSuffix(a, ".test") {
+		return true
+	}
+	if strings.HasSuffix(a, "__debug_bin") {
+		return true
+	}
+	return false
+}
+
+func (Logger) IsGoTest() bool {
+	return IsGoTest()
 }
 
 func GetExecutableName() string {

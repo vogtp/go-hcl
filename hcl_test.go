@@ -71,16 +71,18 @@ func checkLevel(t *testing.T, tc logTestCase, logName string, level hclog.Level,
 		assert.Equal(t, 0, buf.Len(), "no output expected")
 		return
 	}
-	p, l := parseLine(buf.Line())
+	line := buf.Line()
+	p, l := parseLine(line)
 	exp := fmt.Sprintf("%s: text to output\n", logName)
-	assert.Equal(t, prefix, p, "wong prefix")
-	assert.Equal(t, exp, l, "logline is wrong")
+	assert.Equal(t, prefix, p, "wong prefix", line)
+	assert.Equal(t, exp, l, "logline is wrong", line)
 
 	out("text to output", "strParam", "someParam", "intParam", 42)
-	p, l = parseLine(buf.Line())
+	line = buf.Line()
+	p, l = parseLine(line)
 	exp = fmt.Sprintf("%s: text to output: strParam=someParam intParam=42\n", logName)
-	assert.Equal(t, prefix, p, "wong prefix (with params)")
-	assert.Equal(t, exp, l, "logline is wrong (with params")
+	assert.Equal(t, prefix, p, "wong prefix (with params)", line)
+	assert.Equal(t, exp, l, "logline is wrong (with params", line)
 }
 
 type logTestCase struct {
@@ -136,14 +138,19 @@ func TestStdLibCompat(t *testing.T) {
 }
 
 func TestIsGoRun(t *testing.T) {
+	assert.False(t, IsGoRun(), "Selftest", os.Args[0])
+	l := New("")
+	assert.False(t, l.IsGoRun(), "Selftest", os.Args[0])
 	arg := os.Args[0]
 	defer func() { os.Args[0] = arg }()
 	tests := []struct {
 		arg0  string
 		goRun bool
 	}{
-		{"/test/tmp/go-build2932332730/b001/go-hcl.test", true},
-		{"/test/tmp/b001/go-hcl.test", false},
+		{"/test/tmp/go-build2932332730/b001/go-hcl", true},
+		{"/test/tmp/go-build2932332730/b001/go-hcl.test", false},
+		{"/test/tmp/b001/go-hcl", false},
+		{"/test/tmp/go-build/2932332730/b001/go-hcl", false},
 		{"/test/tmp/go-build/2932332730/b001/go-hcl.test", false},
 		{"/bin/exe", false},
 		{"./main.go", false},
@@ -161,6 +168,42 @@ func TestIsGoRun(t *testing.T) {
 
 			os.Args[0] = tc.arg0
 			assert.Equal(t, tc.goRun, IsGoRun())
+		})
+	}
+}
+
+func TestIsGoTest(t *testing.T) {
+	assert.True(t, IsGoTest(), "Selftest", os.Args[0])
+	l := New("")
+	assert.True(t, l.IsGoTest(), "Selftest", os.Args[0])
+	arg := os.Args[0]
+	defer func() { os.Args[0] = arg }()
+	tests := []struct {
+		arg0 string
+		exp  bool
+	}{
+		{"/test/tmp/go-build2932332730/b001/go-hcl", false},
+		{"/test/tmp/go-build2932332730/b001/go-hcl.test", true},
+		{"/test/tmp/b001/go-hcl", false},
+		{"/test/tmp/go-build/2932332730/b001/go-hcl", false},
+		{"/test/tmp/go-build/2932332730/b001/go-hcl.test", true},
+		{"/bin/exe", false},
+		{"./main.go", false},
+		{`c:\Users\Administrator\some.exe`, false},
+		{`c:\Users\Administrator\AppData\Local\Temp\go-build607140747/b001/go-hcl.exe`, false},
+		{`c:\Users\Administrator\AppData\Local\Temp\go-build607140747/b001/go-hcl.test`, true},
+		{`/test/gogo-build/someThing`, false},
+		{`c:\Temp\thisgo-build\a.exe`, false},
+		{`c:\Temp\this\go-build\a.exe`, false},
+		{`\\go-build-server\someshare`, false},
+		{``, false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.arg0, func(t *testing.T) {
+
+			os.Args[0] = tc.arg0
+			assert.Equal(t, tc.exp, IsGoTest())
 		})
 	}
 }

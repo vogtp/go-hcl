@@ -18,14 +18,19 @@ func New(name string, opts ...LoggerOpt) *Logger {
 		opt(actLog)
 	}
 	if actLog.w == nil {
-		actLog.SetWriter(os.Stderr)
+		actLog.w = os.Stderr
 	}
 	if actLog.level == hclog.NoLevel {
 		actLog.level = hclog.Warn
 		if IsGoRun() {
 			actLog.level = hclog.Info
 		}
+		if IsGoTest() {
+			actLog.level = hclog.Debug
+		}
 	}
+	// this creates the backend logger
+	actLog.SetWriter(actLog.w)
 	return actLog
 }
 
@@ -37,7 +42,7 @@ func (l *Logger) SetWriter(w io.Writer) {
 		Output:     w,
 		Level:      l.level,
 	})
-	actLog.w = actLog.StandardWriter(&hclog.StandardLoggerOptions{InferLevels: true})
+	actLog.w = w
 
 	gologger.SetOutput(actLog.w)
 	gologger.SetPrefix("")
@@ -49,6 +54,6 @@ type LoggerOpt func(*Logger)
 // Used to create a logger with a custom writer
 func WithWriter(w io.Writer) LoggerOpt {
 	return func(l *Logger) {
-		l.SetWriter(w)
+		l.w = w
 	}
 }
