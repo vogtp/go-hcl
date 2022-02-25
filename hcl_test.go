@@ -58,6 +58,9 @@ func TestDefault(t *testing.T) {
 	assert.Equal(t, "[WARN]  go-hcl: text to output: test string\n", buf.Line())
 	Errorf("text to output: %s", "test string")
 	assert.Equal(t, "[ERROR] go-hcl: text to output: test string\n", buf.Line())
+
+	GetWriter().Write([]byte("text to output"))
+	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
 }
 
 type outFunc func(msg string, args ...interface{})
@@ -106,7 +109,10 @@ func TestLogLevel(t *testing.T) {
 		hclog.Error,
 	}
 	logName := "test-logger"
-	l := New(logName, WithWriter(&buf))
+	l := New(logName, WithWriter(&buf), WithLevel(hclog.Trace))
+	assert.True(t, l.IsTrace())
+	SetLevel(hclog.Error)
+	assert.True(t, l.IsError())
 	for _, tc := range tt {
 		t.Run(tc.String(), func(t *testing.T) {
 			l.SetLevel(tc)
@@ -124,6 +130,78 @@ func TestLogLevel(t *testing.T) {
 			checkLevel(t, tc, logName, hclog.Trace, l.Trace, l.IsTrace)
 		})
 	}
+}
+
+func TestSubLogger(t *testing.T) {
+	tt := []hclog.Level{
+		hclog.Trace,
+		hclog.Debug,
+		hclog.Info,
+		hclog.Warn,
+		hclog.Error,
+	}
+	logName := "test-logger"
+	l := New(logName, WithWriter(&buf), WithLevel(hclog.Trace))
+	assert.True(t, l.IsTrace())
+	for _, tc := range tt {
+		t.Run(tc.String(), func(t *testing.T) {
+			l.SetLevel(tc)
+			// test package functions
+			checkLevel(t, tc, logName, hclog.Error, Error, IsError)
+			checkLevel(t, tc, logName, hclog.Warn, Warn, IsWarn)
+			checkLevel(t, tc, logName, hclog.Info, Info, IsInfo)
+			checkLevel(t, tc, logName, hclog.Debug, Debug, IsDebug)
+			checkLevel(t, tc, logName, hclog.Trace, Trace, IsTrace)
+			// test logger funtions
+			checkLevel(t, tc, logName, hclog.Error, l.Error, l.IsError)
+			checkLevel(t, tc, logName, hclog.Warn, l.Warn, l.IsWarn)
+			checkLevel(t, tc, logName, hclog.Info, l.Info, l.IsInfo)
+			checkLevel(t, tc, logName, hclog.Debug, l.Debug, l.IsDebug)
+			checkLevel(t, tc, logName, hclog.Trace, l.Trace, l.IsTrace)
+		})
+	}
+	n := "sublog"
+	sublogName := fmt.Sprintf("%s.%s", logName, n)
+	l = l.Named(n)
+	for _, tc := range tt {
+		t.Run(tc.String(), func(t *testing.T) {
+			l.SetLevel(tc)
+			// test package functions
+			checkLevel(t, tc, logName, hclog.Error, Error, IsError)
+			checkLevel(t, tc, logName, hclog.Warn, Warn, IsWarn)
+			checkLevel(t, tc, logName, hclog.Info, Info, IsInfo)
+			checkLevel(t, tc, logName, hclog.Debug, Debug, IsDebug)
+			checkLevel(t, tc, logName, hclog.Trace, Trace, IsTrace)
+			// test logger funtions
+			checkLevel(t, tc, sublogName, hclog.Error, l.Error, l.IsError)
+			checkLevel(t, tc, sublogName, hclog.Warn, l.Warn, l.IsWarn)
+			checkLevel(t, tc, sublogName, hclog.Info, l.Info, l.IsInfo)
+			checkLevel(t, tc, sublogName, hclog.Debug, l.Debug, l.IsDebug)
+			checkLevel(t, tc, sublogName, hclog.Trace, l.Trace, l.IsTrace)
+		})
+	}
+	sublogName = "new-name"
+	l = l.ResetNamed(sublogName)
+	for _, tc := range tt {
+		t.Run(tc.String(), func(t *testing.T) {
+			l.SetLevel(tc)
+			// test package functions
+			checkLevel(t, tc, logName, hclog.Error, Error, IsError)
+			checkLevel(t, tc, logName, hclog.Warn, Warn, IsWarn)
+			checkLevel(t, tc, logName, hclog.Info, Info, IsInfo)
+			checkLevel(t, tc, logName, hclog.Debug, Debug, IsDebug)
+			checkLevel(t, tc, logName, hclog.Trace, Trace, IsTrace)
+			// test logger funtions
+			checkLevel(t, tc, sublogName, hclog.Error, l.Error, l.IsError)
+			checkLevel(t, tc, sublogName, hclog.Warn, l.Warn, l.IsWarn)
+			checkLevel(t, tc, sublogName, hclog.Info, l.Info, l.IsInfo)
+			checkLevel(t, tc, sublogName, hclog.Debug, l.Debug, l.IsDebug)
+			checkLevel(t, tc, sublogName, hclog.Trace, l.Trace, l.IsTrace)
+		})
+	}
+	l = l.With("arg", "some information")
+	l.Error("an other logline")
+	assert.Equal(t, "[ERROR] new-name: an other logline: arg=\"some information\"\n", buf.Line())
 }
 
 type logTestCase struct {

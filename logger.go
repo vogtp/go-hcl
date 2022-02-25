@@ -18,6 +18,17 @@ type Logger struct {
 	name  string
 }
 
+//creates a copy of itslef
+func (l *Logger) copy() Logger {
+	n := Logger{
+		Logger: l.Logger,
+		w:      l.w,
+		level:  l.level,
+		name:   l.name,
+	}
+	return n
+}
+
 func (l *Logger) Errorf(format string, v ...interface{}) {
 	l.Logger.Error(fmt.Sprintf(format, v...))
 }

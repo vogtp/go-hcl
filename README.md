@@ -2,6 +2,8 @@
 hcl is a replacement for log which wraps hc-log 
 it does not support Fatal or Panic function
 
+It redirects std lib log to itself
+
 ```go
 package main
 

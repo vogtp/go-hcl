@@ -1,6 +1,7 @@
 package hcl
 
 import (
+	"fmt"
 	"io"
 	gologger "log"
 	"os"
@@ -12,10 +13,10 @@ import (
 // constructs a new logger
 // loglevel is Error if build and info if `go run`
 // std lib logging is redirected
-func New(name string, opts ...LoggerOpt) *Logger {
-	actLog = &Logger{name: name}
+func New(name string, opts ...LoggerOpt) Logger {
+	actLog = Logger{name: name}
 	for _, opt := range opts {
-		opt(actLog)
+		opt(&actLog)
 	}
 	if actLog.w == nil {
 		actLog.w = os.Stderr
@@ -31,7 +32,36 @@ func New(name string, opts ...LoggerOpt) *Logger {
 	}
 	// this creates the backend logger
 	actLog.SetWriter(actLog.w)
+	// sets the std lib logger to write to us
+	gologger.SetOutput(actLog.GetWriter())
+	gologger.SetPrefix("")
+	gologger.SetFlags(0)
 	return actLog
+}
+
+// Creates a sublogger that will always have the given key/value pairs
+func (l *Logger) With(args ...interface{}) Logger {
+	sl := l.copy()
+	sl.Logger = l.Logger.With(args...)
+	return sl
+}
+
+// Create a logger that will prepend the name string on the front of all messages.
+// If the logger already has a name, the new value will be appended to the current
+// name. That way, a major subsystem can use this to decorate all it's own logs
+// without losing context.
+func (l *Logger) Named(name string) Logger {
+	return l.ResetNamed(fmt.Sprintf("%s.%s", l.name, name))
+}
+
+// Create a logger that will prepend the name string on the front of all messages.
+// This sets the name of the logger to the value directly, unlike Named which honor
+// the current name as well.
+func (l *Logger) ResetNamed(name string) Logger {
+	sl := l.copy()
+	sl.name = name
+	sl.Logger = l.Logger.ResetNamed(name)
+	return sl
 }
 
 //Sets the write to this logger and redirects the std lib log
@@ -43,10 +73,6 @@ func (l *Logger) SetWriter(w io.Writer) {
 		Level:      l.level,
 	})
 	actLog.w = w
-
-	gologger.SetOutput(l.GetWriter())
-	gologger.SetPrefix("")
-	gologger.SetFlags(0)
 }
 
 // return a writer to used for frameworks to output to log
@@ -60,5 +86,12 @@ type LoggerOpt func(*Logger)
 func WithWriter(w io.Writer) LoggerOpt {
 	return func(l *Logger) {
 		l.w = w
+	}
+}
+
+// Used to create a logger with log level
+func WithLevel(lvl hclog.Level) LoggerOpt {
+	return func(l *Logger) {
+		l.level = lvl
 	}
 }

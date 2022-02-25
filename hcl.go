@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 )
 
-var actLog *Logger
+var actLog Logger
 
 // inits a logger with the binary name
 func initDefaultLogger() {
@@ -120,4 +120,8 @@ func IsError() bool {
 // return a writer to used for frameworks to output to log
 func GetWriter() io.Writer {
 	return actLog.GetWriter()
+}
+
+func SetLevel(level hclog.Level) {
+	actLog.SetLevel(level)
 }
