@@ -1,4 +1,4 @@
-# go-hcl [![GoDoc reference example](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/vogtp/go-hcl)
+# go-hcl [![GoDoc](https://pkg.go.dev/badge/github.com/vogtp/go-hcl?status.svg)](https://pkg.go.dev/github.com/vogtp/go-hcl?tab=doc)
 
 hcl is a replacement for log which wraps hc-log 
 it does not support Fatal or Panic function.
