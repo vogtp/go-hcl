@@ -61,10 +61,10 @@ func TestDefault(t *testing.T) {
 
 	GetWriter().Write([]byte("text to output"))
 	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
-	l:=Named("named")
+	l := Named("named")
 	l.Errorf("text to output: %s", "test string")
 	assert.Equal(t, "[ERROR] go-hcl.named: text to output: test string\n", buf.Line())
-	l2:=ResetNamed("named")
+	l2 := ResetNamed("named")
 	l2.Errorf("text to output: %s", "test string")
 	assert.Equal(t, "[ERROR] named: text to output: test string\n", buf.Line())
 }
@@ -368,6 +368,7 @@ func TestGetExecutableName(t *testing.T) {
 		{"/bin/exe.ext", "exe"},
 		{"./main.go", "main"},
 		{`c:\Users\Administrator\some.exe`, "some"},
+		{`c:\Users\Administrator\some.test.exe`, "some"},
 		{`c:\Users\Administrator\.some.exe`, ".some"},
 		{`c:\Users\Administrator\.some`, ".some"},
 		{`c:\Users\Administrator\AppData\Local\Temp\go-build607140747/b001/go-hcl.exe`, "go-hcl"},
