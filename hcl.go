@@ -122,6 +122,17 @@ func GetWriter() io.Writer {
 	return actLog.GetWriter()
 }
 
+//set the log level
 func SetLevel(level hclog.Level) {
 	actLog.SetLevel(level)
+}
+
+// Create a sublogger with the name appended to the old name
+func Named(name string) Logger {
+	return actLog.Named(name)
+}
+
+// Create a logger with a new name
+func ResetNamed(name string) Logger {
+	return actLog.ResetNamed(name)
 }

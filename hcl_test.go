@@ -61,6 +61,12 @@ func TestDefault(t *testing.T) {
 
 	GetWriter().Write([]byte("text to output"))
 	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
+	l:=Named("named")
+	l.Errorf("text to output: %s", "test string")
+	assert.Equal(t, "[ERROR] go-hcl.named: text to output: test string\n", buf.Line())
+	l2:=ResetNamed("named")
+	l2.Errorf("text to output: %s", "test string")
+	assert.Equal(t, "[ERROR] named: text to output: test string\n", buf.Line())
 }
 
 type outFunc func(msg string, args ...interface{})

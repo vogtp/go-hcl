@@ -46,17 +46,13 @@ func (l *Logger) With(args ...interface{}) Logger {
 	return sl
 }
 
-// Create a logger that will prepend the name string on the front of all messages.
-// If the logger already has a name, the new value will be appended to the current
-// name. That way, a major subsystem can use this to decorate all it's own logs
-// without losing context.
+
+// Create a sublogger with the name appended to the old name
 func (l *Logger) Named(name string) Logger {
 	return l.ResetNamed(fmt.Sprintf("%s.%s", l.name, name))
 }
 
-// Create a logger that will prepend the name string on the front of all messages.
-// This sets the name of the logger to the value directly, unlike Named which honor
-// the current name as well.
+// Create a logger with a new name
 func (l *Logger) ResetNamed(name string) Logger {
 	sl := l.copy()
 	sl.name = name
