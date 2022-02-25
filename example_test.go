@@ -30,7 +30,7 @@ func ExampleStdLibLikeLogging() {
 	//create a sublogger
 	webLogger := hcl.Named("web")
 	webLogger.Info("Start of web logs")
-	
+
 	// 2022-02-25T09:40:12+01:00 [INFO]  hcl: I am a logger named after the executable
 	// 2022-02-25T09:40:12+01:00 [INFO]  hcl: But I go rid of some parts in /tmp/go-build2029833176/b001/hcl.test
 	// 2022-02-25T09:40:12+01:00 [INFO]  hcl: I log to Info
@@ -47,4 +47,7 @@ func ExampleStdLibLikeLogging() {
 func ExampleAppLogger() {
 	log := hcl.New("app-name")
 	log.Info("I am a logger named after the application")
+
+	log2:= hcl.ResetNamed("app-name")
+	log2.Warnf("Mostly the same as above: %s", "but not as clear")
 }
