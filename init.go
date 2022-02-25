@@ -40,7 +40,7 @@ func New(name string, opts ...LoggerOpt) Logger {
 }
 
 // Creates a sublogger that will always have the given key/value pairs
-func (l *Logger) With(args ...interface{}) Logger {
+func (l Logger) With(args ...interface{}) Logger {
 	sl := l.copy()
 	sl.Logger = l.Logger.With(args...)
 	return sl
@@ -48,12 +48,12 @@ func (l *Logger) With(args ...interface{}) Logger {
 
 
 // Create a sublogger with the name appended to the old name
-func (l *Logger) Named(name string) Logger {
+func (l Logger) Named(name string) Logger {
 	return l.ResetNamed(fmt.Sprintf("%s.%s", l.name, name))
 }
 
 // Create a logger with a new name
-func (l *Logger) ResetNamed(name string) Logger {
+func (l Logger) ResetNamed(name string) Logger {
 	sl := l.copy()
 	sl.name = name
 	sl.Logger = l.Logger.ResetNamed(name)
@@ -72,7 +72,7 @@ func (l *Logger) SetWriter(w io.Writer) {
 }
 
 // return a writer to used for frameworks to output to log
-func (l *Logger) GetWriter() io.Writer {
+func (l Logger) GetWriter() io.Writer {
 	return l.StandardWriter(&hclog.StandardLoggerOptions{InferLevels: true})
 }
 
