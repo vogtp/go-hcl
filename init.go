@@ -28,7 +28,7 @@ func initDefaultLogger() {
 // loglevel is Error if build and info if `go run`
 // std lib logging is redirected
 func New(opts ...LoggerOpt) Logger {
-	actLog = &Logger{
+	l := &Logger{
 		name:          GetExecutableName(),
 		captureStdlib: true,
 		hcOpts: &hclog.LoggerOptions{
@@ -36,29 +36,30 @@ func New(opts ...LoggerOpt) Logger {
 		},
 	}
 	for _, opt := range opts {
-		opt(actLog)
+		opt(l)
 	}
-	if actLog.w == nil {
-		actLog.w = os.Stderr
+	if l.w == nil {
+		l.w = os.Stderr
 	}
-	if actLog.level == hclog.NoLevel {
-		actLog.level = hclog.Warn
+	if l.level == hclog.NoLevel {
+		l.level = hclog.Warn
 		if IsGoRun() {
-			actLog.level = hclog.Info
+			l.level = hclog.Info
 		}
 		if IsGoTest() {
-			actLog.level = hclog.Debug
+			l.level = hclog.Debug
 		}
 	}
 	// this creates the backend logger
-	actLog.SetWriter(actLog.w)
-	if actLog.captureStdlib {
+	l.SetWriter(l.w)
+	if l.captureStdlib {
 		// sets the std lib logger to write to us
-		gologger.SetOutput(actLog.GetWriter())
+		gologger.SetOutput(l.GetWriter())
 		gologger.SetPrefix("")
 		gologger.SetFlags(0)
 	}
-	return *actLog
+	actLog = l
+	return *l
 }
 
 // With sreates a sublogger
@@ -91,12 +92,15 @@ func LibraryLogger(name string) Logger {
 		return l
 	}
 	opts := hclog.LoggerOptions{TimeFormat: TimeFormat}
-	return New(
+	l := New(
 		WithName(name),
 		WithLevel(hclog.Info),
 		WithLoggerOptions(&opts),
 		WithStdlib(false),
 	)
+	// keep actLog clean (we are called from a lib)
+	actLog = nil
+	return l
 }
 
 // SetWriter sets the write of this logger
