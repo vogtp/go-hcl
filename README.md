@@ -1,4 +1,4 @@
-# go-hcl [[![Go](https://github.com/vogtp/go-hcl/actions/workflows/go.yml/badge.svg)](https://github.com/vogtp/go-hcl/actions/workflows/go.yml)[![codecov](https://codecov.io/gh/vogtp/go-hcl/branch/main/graph/badge.svg?token=DV0IDZ2FXE)](https://codecov.io/gh/vogtp/go-hcl)[![Go Report Card](https://goreportcard.com/badge/github.com/vogtp/go-hcl)](https://goreportcard.com/report/github.com/vogtp/go-hcl)![GoDoc](https://pkg.go.dev/badge/github.com/vogtp/go-hcl?status.svg)](https://pkg.go.dev/github.com/vogtp/go-hcl?tab=doc)
+# go-hcl [![Go](https://github.com/vogtp/go-hcl/actions/workflows/go.yml/badge.svg)](https://github.com/vogtp/go-hcl/actions/workflows/go.yml)[![codecov](https://codecov.io/gh/vogtp/go-hcl/branch/main/graph/badge.svg?token=DV0IDZ2FXE)](https://codecov.io/gh/vogtp/go-hcl)[![Go Report Card](https://goreportcard.com/badge/github.com/vogtp/go-hcl)](https://goreportcard.com/report/github.com/vogtp/go-hcl)[![GoDoc](https://pkg.go.dev/badge/github.com/vogtp/go-hcl?status.svg)](https://pkg.go.dev/github.com/vogtp/go-hcl?tab=doc)
 
 hcl is a replacement for log which wraps hc-log 
 it does not support Fatal or Panic function.
