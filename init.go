@@ -14,6 +14,16 @@ const (
 	TimeFormat = "2006/01/02 15:04:05"
 )
 
+var actLog *Logger
+
+// inits a logger with the binary name
+func initDefaultLogger() {
+	if actLog == nil {
+		l := New()
+		actLog = &l
+	}
+}
+
 // New constructs a new logger
 // loglevel is Error if build and info if `go run`
 // std lib logging is redirected

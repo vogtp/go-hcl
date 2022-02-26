@@ -18,16 +18,6 @@ import (
 	"github.com/hashicorp/go-hclog"
 )
 
-var actLog *Logger
-
-// inits a logger with the binary name
-func initDefaultLogger() {
-	if actLog == nil {
-		l := New()
-		actLog = &l
-	}
-}
-
 // Fatalf provides printf like logging to Error
 // it stops execution with exit code 1
 func Fatalf(format string, v ...interface{}) {
