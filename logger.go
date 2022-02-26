@@ -3,6 +3,7 @@ package hcl
 import (
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/hashicorp/go-hclog"
 )
@@ -28,6 +29,13 @@ func (l Logger) copy() Logger {
 	return n
 }
 
+// Fatalf provides printf like logging to Error
+// it stops execution with exit code 1
+func (l Logger) Fatalf(format string, v ...interface{}) {
+	l.Logger.Error(fmt.Sprintf(format, v...))
+	os.Exit(1)
+}
+
 // Errorf provides printf like logging to Error
 func (l Logger) Errorf(format string, v ...interface{}) {
 	l.Logger.Error(fmt.Sprintf(format, v...))
@@ -51,6 +59,13 @@ func (l Logger) Debugf(format string, v ...interface{}) {
 // Tracef provides printf like logging to Trace
 func (l Logger) Tracef(format string, v ...interface{}) {
 	l.Logger.Trace(fmt.Sprintf(format, v...))
+}
+
+// Fatal logs to Error
+// it stops execution with exit code 1
+func (l Logger) Fatal(format string, v ...interface{}) {
+	l.Logger.Trace(fmt.Sprintf(format, v...))
+	os.Exit(1)
 }
 
 // Printf works like Printf from stdlib

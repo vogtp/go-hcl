@@ -1,10 +1,12 @@
 package hcl
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	gologger "log"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 
@@ -386,4 +388,36 @@ func TestGetExecutableName(t *testing.T) {
 			assert.Equal(t, tc.name, GetExecutableName())
 		})
 	}
+}
+
+func TestFatal(t *testing.T) {
+	if os.Getenv("BE_CRASHER") == "1" {
+		Fatal("log line", "crash", "now")
+		return
+	}
+	cmd := exec.Command(os.Args[0], "-test.run=TestFatal")
+	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
+	cmd.Stderr = bufio.NewWriter(&buf)
+	err := cmd.Run()
+	if e, ok := err.(*exec.ExitError); !ok || e.Success() {
+		t.Fatalf("process ran with err %v, want exit status 1", err)
+	}
+
+	assert.Equal(t, "[ERROR] go-hcl: log line: crash=now\n", buf.Line())
+}
+
+func TestFatalf(t *testing.T) {
+	if os.Getenv("BE_CRASHER") == "1" {
+		Fatalf("log line: %s", "crash")
+		return
+	}
+	cmd := exec.Command(os.Args[0], "-test.run=TestFatalf")
+	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
+	cmd.Stderr = bufio.NewWriter(&buf)
+	err := cmd.Run()
+	if e, ok := err.(*exec.ExitError); !ok || e.Success() {
+		t.Fatalf("process ran with err %v, want exit status 1", err)
+	}
+
+	assert.Equal(t, "[ERROR] go-hcl: log line: crash\n", buf.Line())
 }
