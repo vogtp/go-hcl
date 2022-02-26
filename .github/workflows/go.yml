@@ -24,10 +24,6 @@ jobs:
     - name: Test
       run: go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
 
-name: codecov
-on: [push]
-jobs:
-
   codecov:
     name: codecov
     runs-on: ubuntu-latest
