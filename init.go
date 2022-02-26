@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 )
 
-// constructs a new logger
+// New constructs a new logger
 // loglevel is Error if build and info if `go run`
 // std lib logging is redirected
 func New(name string, opts ...LoggerOpt) Logger {
@@ -39,19 +39,20 @@ func New(name string, opts ...LoggerOpt) Logger {
 	return actLog
 }
 
-// Creates a sublogger that will always have the given key/value pairs
+// With sreates a sublogger
+// that will always have the given key/value pairs
 func (l Logger) With(args ...interface{}) Logger {
 	sl := l.copy()
 	sl.Logger = l.Logger.With(args...)
 	return sl
 }
 
-// Create a sublogger with the name appended to the old name
+// Named creates a sublogger with the name appended to the old name
 func (l Logger) Named(name string) Logger {
 	return l.ResetNamed(fmt.Sprintf("%s.%s", l.name, name))
 }
 
-// Create a logger with a new name
+// ResetNamed creates a logger with a new name
 func (l Logger) ResetNamed(name string) Logger {
 	sl := l.copy()
 	sl.name = name
@@ -59,7 +60,8 @@ func (l Logger) ResetNamed(name string) Logger {
 	return sl
 }
 
-//Sets the write to this logger and redirects the std lib log
+// SetWriter sets the write of this logger
+// redirects the std lib log
 func (l *Logger) SetWriter(w io.Writer) {
 	actLog.Logger = hclog.New(&hclog.LoggerOptions{
 		Name:       l.name,
@@ -70,22 +72,23 @@ func (l *Logger) SetWriter(w io.Writer) {
 	actLog.w = w
 }
 
-// return a writer to used for frameworks to output to log
+// GetWriter returns a writer
+// to be used for frameworks to output to log
 func (l Logger) GetWriter() io.Writer {
 	return l.StandardWriter(&hclog.StandardLoggerOptions{InferLevels: true})
 }
 
-// func to set opts at logger creation
+// LoggerOpt is a func to set opts at logger creation
 type LoggerOpt func(*Logger)
 
-// Used to create a logger with a custom writer
+// WithWriter is used to create a logger with a custom writer
 func WithWriter(w io.Writer) LoggerOpt {
 	return func(l *Logger) {
 		l.w = w
 	}
 }
 
-// Used to create a logger with log level
+// WithLevel is used to create a logger with log level
 func WithLevel(lvl hclog.Level) LoggerOpt {
 	return func(l *Logger) {
 		l.level = lvl

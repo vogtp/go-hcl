@@ -28,47 +28,50 @@ func (l Logger) copy() Logger {
 	return n
 }
 
-// Printf like logging to Error
+// Errorf provides printf like logging to Error
 func (l Logger) Errorf(format string, v ...interface{}) {
 	l.Logger.Error(fmt.Sprintf(format, v...))
 }
 
-// Printf like logging to Warn
+// Warnf provides printf like logging to Warn
 func (l Logger) Warnf(format string, v ...interface{}) {
 	l.Logger.Warn(fmt.Sprintf(format, v...))
 }
 
-// Printf like logging to Info
+// Infof provides printf like logging to Info
 func (l Logger) Infof(format string, v ...interface{}) {
 	l.Logger.Info(fmt.Sprintf(format, v...))
 }
 
-// Printf like logging to Debug
+// Debugf provides printf like logging to Debug
 func (l Logger) Debugf(format string, v ...interface{}) {
 	l.Logger.Debug(fmt.Sprintf(format, v...))
 }
 
-// Printf like logging to Trace
+// Tracef provides printf like logging to Trace
 func (l Logger) Tracef(format string, v ...interface{}) {
 	l.Logger.Trace(fmt.Sprintf(format, v...))
 }
 
-// Printf logging to Info
+// Printf works like Printf from stdlib
+// logs to Info
 func (l Logger) Printf(format string, v ...interface{}) {
 	l.Logger.Info(fmt.Sprintf(format, v...))
 }
 
-// Print logging to Info
+// Print works like Print from stdlib
+// logs to Info
 func (l Logger) Print(v ...interface{}) {
 	l.Logger.Info(fmt.Sprint(v...))
 }
 
-// Println logging to Info
+// Println works like hcl.Print
+// logs to Info
 func (l Logger) Println(v ...interface{}) {
 	l.Logger.Info(fmt.Sprint(v...))
 }
 
-// set the log level
+// SetLevel sets the log level
 func (l *Logger) SetLevel(level hclog.Level) {
 	l.level = level
 	l.Logger.SetLevel(level)

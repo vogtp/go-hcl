@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// checks if run by go run
+// IsGoRun checks if run by go run
 // it does this by checking arg[0]
 func IsGoRun() bool {
 	if IsGoTest() {
@@ -28,13 +28,13 @@ func IsGoRun() bool {
 	return err == nil
 }
 
-// checks if run by go run
+// IsGoRun checks if run by go run
 // it does this by checking arg[0]
 func (Logger) IsGoRun() bool {
 	return IsGoRun()
 }
 
-// checks if run by go test
+// IsGoTest checks if run by go test
 // it does this by checking arg[0]
 func IsGoTest() bool {
 	a := os.Args[0]
@@ -50,13 +50,13 @@ func IsGoTest() bool {
 	return false
 }
 
-// checks if run by go test
+// IsGoTest checks if run by go test
 // it does this by checking arg[0]
 func (Logger) IsGoTest() bool {
 	return IsGoTest()
 }
 
-// extracts the name of the executable
+// GetExecutableName extracts the name of the executable
 // removes path and suffix
 func GetExecutableName() string {
 	a := os.Args[0]

@@ -8,7 +8,7 @@ import (
 	"github.com/vogtp/go-hcl"
 )
 
-func ExampleStdLibLikeLogging() {
+func ExampleLogger() {
 
 	// log to a logger named after the executable
 	hcl.Print("I am a logger named after the executable")
@@ -44,7 +44,7 @@ func ExampleStdLibLikeLogging() {
 	// 2022-02-25T09:40:12+01:00 [INFO]  hcl.web: Start of web logs
 }
 
-func ExampleAppLogger() {
+func ExampleNew() {
 	log := hcl.New("app-name")
 	log.Info("I am a logger named after the application")
 
