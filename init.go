@@ -75,6 +75,7 @@ func (l Logger) GetWriter() io.Writer {
 	return l.StandardWriter(&hclog.StandardLoggerOptions{InferLevels: true})
 }
 
+// func to set opts at logger creation
 type LoggerOpt func(*Logger)
 
 // Used to create a logger with a custom writer

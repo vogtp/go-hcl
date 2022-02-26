@@ -19,22 +19,27 @@ func init() {
 	initDefaultLogger()
 }
 
+// Printf like logging to Error
 func Errorf(format string, v ...interface{}) {
 	actLog.Errorf(format, v...)
 }
 
+// Printf like logging to Warn
 func Warnf(format string, v ...interface{}) {
 	actLog.Warnf(format, v...)
 }
 
+// Printf like logging to Info
 func Infof(format string, v ...interface{}) {
 	actLog.Infof(format, v...)
 }
 
+// Printf like logging to Debug
 func Debugf(format string, v ...interface{}) {
 	actLog.Debugf(format, v...)
 }
 
+// Printf like logging to Trace
 func Tracef(format string, v ...interface{}) {
 	actLog.Tracef(format, v...)
 }
