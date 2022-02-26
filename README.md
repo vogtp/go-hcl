@@ -2,7 +2,7 @@
 
 hcl is a replacement for log which wraps hc-log 
 
-hcl is supposed to proviced advanced but painless logging
+hcl is supposed to provide advanced but painless logging
 
 
 ## Features
