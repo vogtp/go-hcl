@@ -2,9 +2,13 @@
 //
 // hcl is supposed to provide advanced but painless logging
 //
-// it offers simple package level functionality
-// it redirects stdlib log to itself.
-// it does not support Fatal or Panic function
+// - it offers simple package level functionality
+//
+// - exports most (all?) of the hclog features
+//
+// - it redirects stdlib log to itself.
+//
+// - it does not support Fatal or Panic function
 package hcl
 
 import (
