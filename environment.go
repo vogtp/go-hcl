@@ -29,12 +29,6 @@ func IsGoRun() bool {
 	return err == nil
 }
 
-// IsGoRun checks if run by go run
-// it does this by checking arg[0]
-func (Logger) IsGoRun() bool {
-	return IsGoRun()
-}
-
 // IsGoTest checks if run by go test
 // it does this by checking arg[0]
 func IsGoTest() bool {
@@ -49,12 +43,6 @@ func IsGoTest() bool {
 		return true
 	}
 	return false
-}
-
-// IsGoTest checks if run by go test
-// it does this by checking arg[0]
-func (Logger) IsGoTest() bool {
-	return IsGoTest()
 }
 
 // GetExecutableName extracts the name of the executable
