@@ -1,5 +1,7 @@
 // hcl is a replacement for log which wraps hc-log
 //
+// hcl is supposed to proviced advanced but painless logging
+//
 // it offers simple package level functionality
 // it redirects stdlib log to itself.
 // it does not support Fatal or Panic function
