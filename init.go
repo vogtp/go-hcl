@@ -46,7 +46,6 @@ func (l Logger) With(args ...interface{}) Logger {
 	return sl
 }
 
-
 // Create a sublogger with the name appended to the old name
 func (l Logger) Named(name string) Logger {
 	return l.ResetNamed(fmt.Sprintf("%s.%s", l.name, name))

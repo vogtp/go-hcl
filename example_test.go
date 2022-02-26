@@ -48,6 +48,6 @@ func ExampleAppLogger() {
 	log := hcl.New("app-name")
 	log.Info("I am a logger named after the application")
 
-	log2:= hcl.ResetNamed("app-name")
+	log2 := hcl.ResetNamed("app-name")
 	log2.Warnf("Mostly the same as above: %s", "but not as clear")
 }
