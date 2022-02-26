@@ -12,10 +12,12 @@ import (
 type Logger struct {
 	hclog.Logger
 
-	w io.Writer
+	w      io.Writer
+	hcOpts *hclog.LoggerOptions
 
-	level hclog.Level
-	name  string
+	level         hclog.Level
+	name          string
+	captureStdlib bool
 }
 
 //creates a copy of itslef
@@ -23,6 +25,7 @@ func (l Logger) copy() Logger {
 	n := Logger{
 		Logger: l.Logger,
 		w:      l.w,
+		hcOpts: l.hcOpts,
 		level:  l.level,
 		name:   l.name,
 	}

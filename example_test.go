@@ -45,7 +45,7 @@ func ExampleLogger() {
 }
 
 func ExampleNew() {
-	log := hcl.New("app-name")
+	log := hcl.New()
 	log.Info("I am a logger named after the application")
 
 	log2 := hcl.ResetNamed("app-name")

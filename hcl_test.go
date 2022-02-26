@@ -20,8 +20,10 @@ type testWriter struct {
 
 func (tw *testWriter) Line() string {
 	str := tw.String()
-	dataIdx := strings.IndexByte(str, ' ')
 	tw.Reset()
+	dataIdx := strings.IndexByte(str, ' ')
+	str = str[dataIdx+1:]
+	dataIdx = strings.IndexByte(str, ' ')
 	return str[dataIdx+1:]
 }
 
@@ -117,7 +119,7 @@ func TestLogLevel(t *testing.T) {
 		hclog.Error,
 	}
 	logName := "test-logger"
-	l := New(logName, WithWriter(&buf), WithLevel(hclog.Trace))
+	l := New(WithName(logName), WithWriter(&buf), WithLevel(hclog.Trace))
 	assert.True(t, l.IsTrace())
 	SetLevel(hclog.Error)
 	assert.True(t, l.IsError())
@@ -149,7 +151,7 @@ func TestSubLogger(t *testing.T) {
 		hclog.Error,
 	}
 	logName := "test-logger"
-	l := New(logName, WithWriter(&buf), WithLevel(hclog.Trace))
+	l := New(WithName(logName), WithWriter(&buf), WithLevel(hclog.Trace))
 	assert.True(t, l.IsTrace())
 	for _, tc := range tt {
 		t.Run(tc.String(), func(t *testing.T) {
@@ -231,7 +233,7 @@ func TestLogger(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 			os.Args[0] = tc.arg0
-			l := New(logName, WithWriter(&buf))
+			l := New(WithName(logName), WithWriter(&buf))
 			// test package functions
 			assert.Equal(t, tc.test, l.IsGoTest())
 			assert.Equal(t, tc.run, l.IsGoRun())
@@ -254,7 +256,7 @@ func TestLogger(t *testing.T) {
 
 func TestStdLibCompat(t *testing.T) {
 	logName := "test-logger"
-	l := New(logName, WithWriter(&buf))
+	l := New(WithName(logName), WithWriter(&buf))
 	l.Printf("text to output: %s %d", "string", 42)
 	assert.Equal(t, "[INFO]  test-logger: text to output: string 42\n", buf.Line())
 	l.Print("text to output")
@@ -280,7 +282,7 @@ func TestStdLibCompat(t *testing.T) {
 
 func TestIsGoRun(t *testing.T) {
 	assert.False(t, IsGoRun(), "Selftest", os.Args[0])
-	l := New("")
+	l := New()
 	assert.False(t, l.IsGoRun(), "Selftest", os.Args[0])
 	arg := os.Args[0]
 	defer func() { os.Args[0] = arg }()
@@ -316,7 +318,7 @@ func TestIsGoRun(t *testing.T) {
 
 func TestIsGoTest(t *testing.T) {
 	assert.True(t, IsGoTest(), "Selftest", os.Args[0])
-	l := New("")
+	l := New()
 	assert.True(t, l.IsGoTest(), "Selftest", os.Args[0])
 	arg := os.Args[0]
 	defer func() { os.Args[0] = arg }()
@@ -389,6 +391,11 @@ func TestGetExecutableName(t *testing.T) {
 		})
 	}
 }
+func TestGetCaller(t *testing.T) {
+	p, f := GetCaller()
+	assert.Equal(t, "github.com/vogtp/go-hcl", p, "Wrong package")
+	assert.Equal(t, "TestGetCaller", f, "Wrong func")
+}
 
 func TestFatal(t *testing.T) {
 	if os.Getenv("BE_CRASHER") == "1" {
@@ -420,4 +427,82 @@ func TestFatalf(t *testing.T) {
 	}
 
 	assert.Equal(t, "[ERROR] go-hcl: log line: crash\n", buf.Line())
+}
+
+func TestWithStdlib(t *testing.T) {
+	var buf testWriter
+	New(WithWriter(&buf))
+	Printf("text to output: %s %d", "string", 42)
+	assert.Equal(t, "[INFO]  go-hcl: text to output: string 42\n", buf.Line())
+	Print("text to output")
+	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
+	Println("text to output")
+	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
+	gologger.Printf("text to output: %s %d", "string", 42)
+	assert.Equal(t, "[INFO]  go-hcl: text to output: string 42\n", buf.Line())
+	gologger.Print("text to output")
+	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
+	gologger.Println("text to output")
+	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
+
+	New(WithWriter(&buf), WithStdlib(false))
+	Printf("text to output: %s %d", "string", 42)
+	assert.Equal(t, "[INFO]  go-hcl: text to output: string 42\n", buf.Line())
+	Print("text to output")
+	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
+	Println("text to output")
+	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
+	gologger.Printf("text to output: %s %d", "string", 42)
+	assert.Equal(t, "[INFO]  go-hcl: text to output: string 42\n", buf.Line())
+	gologger.Print("text to output")
+	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
+	gologger.Println("text to output")
+	assert.Equal(t, "[INFO]  go-hcl: text to output\n", buf.Line())
+}
+
+func TestWithLoggerOptions(t *testing.T) {
+	var buf bytes.Buffer
+	opts := hclog.LoggerOptions{
+		DisableTime: true,
+	}
+	New(WithName(""), WithLevel(hclog.Info), WithLoggerOptions(&opts), WithWriter(&buf))
+	Printf("text to output: %s %d", "string", 42)
+	assert.Equal(t, "[INFO]  text to output: string 42\n", buf.String())
+	buf.Reset()
+	Print("text to output")
+	assert.Equal(t, "[INFO]  text to output\n", buf.String())
+	buf.Reset()
+	Println("text to output")
+	assert.Equal(t, "[INFO]  text to output\n", buf.String())
+	buf.Reset()
+}
+
+func TestLibraryLogger(t *testing.T) {
+	New(WithName("base"), WithLevel(hclog.Info), WithWriter(&buf))
+	libLog := LibraryLogger("libName")
+	libLog.Printf("text to output: %s %d", "string", 42)
+	assert.Equal(t, "[INFO]  base.libName: text to output: string 42\n", buf.Line())
+
+	libLog.Print("text to output")
+	assert.Equal(t, "[INFO]  base.libName: text to output\n", buf.Line())
+
+	libLog.Println("text to output")
+	assert.Equal(t, "[INFO]  base.libName: text to output\n", buf.Line())
+
+	gologger.Println("text to output")
+	assert.Equal(t, "[INFO]  base: text to output\n", buf.Line())
+
+	actLog = nil
+	gologger.SetOutput(os.Stderr)
+	libLog = LibraryLogger("libName")
+	libLog.SetWriter(&buf)
+	libLog.Printf("text to output: %s %d", "string", 42)
+	assert.Equal(t, "[INFO]  libName: text to output: string 42\n", buf.Line())
+	libLog.Print("text to output")
+	assert.Equal(t, "[INFO]  libName: text to output\n", buf.Line())
+	libLog.Println("text to output")
+	assert.Equal(t, "[INFO]  libName: text to output\n", buf.Line())
+	gologger.Println("text to output")
+	assert.Equal(t, "", buf.Line())
+
 }

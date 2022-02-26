@@ -5,18 +5,28 @@ import (
 	"io"
 	gologger "log"
 	"os"
-	"time"
 
 	"github.com/hashicorp/go-hclog"
+)
+
+const (
+	// TimeFormat is the default time formating of hcl
+	TimeFormat = "2006/01/02 15:04:05"
 )
 
 // New constructs a new logger
 // loglevel is Error if build and info if `go run`
 // std lib logging is redirected
-func New(name string, opts ...LoggerOpt) Logger {
-	actLog = Logger{name: name}
+func New(opts ...LoggerOpt) Logger {
+	actLog = &Logger{
+		name:          GetExecutableName(),
+		captureStdlib: true,
+		hcOpts: &hclog.LoggerOptions{
+			TimeFormat: TimeFormat,
+		},
+	}
 	for _, opt := range opts {
-		opt(&actLog)
+		opt(actLog)
 	}
 	if actLog.w == nil {
 		actLog.w = os.Stderr
@@ -32,11 +42,13 @@ func New(name string, opts ...LoggerOpt) Logger {
 	}
 	// this creates the backend logger
 	actLog.SetWriter(actLog.w)
-	// sets the std lib logger to write to us
-	gologger.SetOutput(actLog.GetWriter())
-	gologger.SetPrefix("")
-	gologger.SetFlags(0)
-	return actLog
+	if actLog.captureStdlib {
+		// sets the std lib logger to write to us
+		gologger.SetOutput(actLog.GetWriter())
+		gologger.SetPrefix("")
+		gologger.SetFlags(0)
+	}
+	return *actLog
 }
 
 // With sreates a sublogger
@@ -60,16 +72,31 @@ func (l Logger) ResetNamed(name string) Logger {
 	return sl
 }
 
+// LibraryLogger creates a logger for libraries
+// if the library used hcl it creates a sublogger
+// otherwise it mimics stdlib
+func LibraryLogger(name string) Logger {
+	if actLog != nil {
+		l := actLog.Named(name)
+		return l
+	}
+	opts := hclog.LoggerOptions{TimeFormat: TimeFormat}
+	return New(
+		WithName(name),
+		WithLevel(hclog.Info),
+		WithLoggerOptions(&opts),
+		WithStdlib(false),
+	)
+}
+
 // SetWriter sets the write of this logger
 // redirects the std lib log
 func (l *Logger) SetWriter(w io.Writer) {
-	actLog.Logger = hclog.New(&hclog.LoggerOptions{
-		Name:       l.name,
-		TimeFormat: time.RFC3339,
-		Output:     w,
-		Level:      l.level,
-	})
-	actLog.w = w
+	l.w = w
+	l.hcOpts.Name = l.name
+	l.hcOpts.Output = w
+	l.hcOpts.Level = l.level
+	l.Logger = hclog.New(l.hcOpts)
 }
 
 // GetWriter returns a writer
@@ -80,6 +107,13 @@ func (l Logger) GetWriter() io.Writer {
 
 // LoggerOpt is a func to set opts at logger creation
 type LoggerOpt func(*Logger)
+
+// WithName sets the name of the logger
+func WithName(name string) LoggerOpt {
+	return func(l *Logger) {
+		l.name = name
+	}
+}
 
 // WithWriter is used to create a logger with a custom writer
 func WithWriter(w io.Writer) LoggerOpt {
@@ -92,5 +126,20 @@ func WithWriter(w io.Writer) LoggerOpt {
 func WithLevel(lvl hclog.Level) LoggerOpt {
 	return func(l *Logger) {
 		l.level = lvl
+	}
+}
+
+// WithLoggerOptions sets the logger options of hclog
+// Name, Level, Output get overwritter by hcl options
+func WithLoggerOptions(opts *hclog.LoggerOptions) LoggerOpt {
+	return func(l *Logger) {
+		l.hcOpts = opts
+	}
+}
+
+// WithStdlib controlls if stdlib logger should be changed
+func WithStdlib(b bool) LoggerOpt {
+	return func(l *Logger) {
+		l.captureStdlib = b
 	}
 }
