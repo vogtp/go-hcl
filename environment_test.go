@@ -32,12 +32,12 @@ func TestIsGoRun(t *testing.T) {
 		{`\\go-build-server\someshare`, false},
 		{``, false},
 	}
-
+	l := hcl.New()
 	for _, tc := range tests {
 		t.Run(tc.arg0, func(t *testing.T) {
-
 			os.Args[0] = tc.arg0
 			assert.Equal(t, tc.goRun, hcl.IsGoRun())
+			assert.Equal(t, tc.goRun, l.IsGoRun())
 		})
 	}
 }
@@ -70,12 +70,12 @@ func TestIsGoTest(t *testing.T) {
 		{`\\go-build-server\someshare`, false},
 		{``, false},
 	}
-
+	l := hcl.New()
 	for _, tc := range tests {
 		t.Run(tc.arg0, func(t *testing.T) {
-
 			os.Args[0] = tc.arg0
 			assert.Equal(t, tc.exp, hcl.IsGoTest())
+			assert.Equal(t, tc.exp, l.IsGoTest())
 		})
 	}
 }
@@ -106,12 +106,12 @@ func TestGetExecutableName(t *testing.T) {
 		{`./exe`, "exe"},
 		{``, ""},
 	}
-
+	l := hcl.New()
 	for _, tc := range tests {
 		t.Run(tc.arg0, func(t *testing.T) {
-
 			os.Args[0] = tc.arg0
 			assert.Equal(t, tc.name, hcl.GetExecutableName())
+			assert.Equal(t, tc.name, l.GetExecutableName())
 		})
 	}
 }
