@@ -115,8 +115,3 @@ func TestGetExecutableName(t *testing.T) {
 		})
 	}
 }
-func TestGetCaller(t *testing.T) {
-	p, f := hcl.GetCaller()
-	assert.Equal(t, "github.com/vogtp/go-hcl_test", p, "Wrong package")
-	assert.Equal(t, "TestGetCaller", f, "Wrong func")
-}

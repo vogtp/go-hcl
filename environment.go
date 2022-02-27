@@ -3,7 +3,6 @@ package hcl
 import (
 	"math"
 	"os"
-	"runtime"
 	"strconv"
 	"strings"
 )
@@ -68,17 +67,4 @@ func GetExecutableName() string {
 		return n
 	}
 	return n[:e]
-}
-
-// GetCaller reports the package and fuction called from
-func GetCaller() (pkg string, fun string) {
-	pc, _, _, _ := runtime.Caller(1)
-	funcName := runtime.FuncForPC(pc).Name()
-	lastSlash := strings.LastIndexByte(funcName, '/')
-	if lastSlash < 0 {
-		lastSlash = 0
-	}
-	lastDot := strings.LastIndexByte(funcName[lastSlash:], '.') + lastSlash
-
-	return funcName[:lastDot], funcName[lastDot+1:]
 }
