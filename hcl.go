@@ -8,22 +8,14 @@
 //
 // - it redirects stdlib log to itself.
 //
-// - it does not support a Panic function
+// - it does not support Fatal or Panic functions
 package hcl
 
 import (
 	"io"
-	"os"
 
 	"github.com/hashicorp/go-hclog"
 )
-
-// Fatalf provides printf like logging to Error
-// it stops execution with exit code 1
-func Fatalf(format string, v ...interface{}) {
-	initDefaultLogger()
-	actLog.Fatalf(format, v...)
-}
 
 // Errorf provides printf like logging to Error
 func Errorf(format string, v ...interface{}) {
@@ -117,14 +109,6 @@ func Warn(msg string, args ...interface{}) {
 func Error(msg string, args ...interface{}) {
 	initDefaultLogger()
 	log(hclog.Error, msg, args...)
-}
-
-// Fatal log a message and key/value pairs at the ERROR level
-// it stops execution with exit code 1
-func Fatal(format string, args ...interface{}) {
-	initDefaultLogger()
-	log(hclog.Error, format, args...)
-	os.Exit(1)
 }
 
 // IsTrace indicates if Trace logs would be written
