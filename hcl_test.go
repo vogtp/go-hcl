@@ -233,14 +233,16 @@ func TestLogger(t *testing.T) {
 			os.Args[0] = tc.arg0
 			l := New(WithName(logName), WithWriter(&buf))
 			// test package functions
+			assert.Equal(t, tc.test, IsGoTest())
+			assert.Equal(t, tc.run, IsGoRun())
 			checkLevel(t, tc.expLevel, logName, hclog.Error, Error, IsError)
 			checkLevel(t, tc.expLevel, logName, hclog.Warn, Warn, IsWarn)
 			checkLevel(t, tc.expLevel, logName, hclog.Info, Info, IsInfo)
 			checkLevel(t, tc.expLevel, logName, hclog.Debug, Debug, IsDebug)
 			checkLevel(t, tc.expLevel, logName, hclog.Trace, Trace, IsTrace)
 			// test logger funtions
-			assert.Equal(t, tc.test, IsGoTest())
-			assert.Equal(t, tc.run, IsGoRun())
+			assert.Equal(t, tc.test, l.IsGoTest())
+			assert.Equal(t, tc.run, l.IsGoRun())
 			checkLevel(t, tc.expLevel, logName, hclog.Error, l.Error, l.IsError)
 			checkLevel(t, tc.expLevel, logName, hclog.Warn, l.Warn, l.IsWarn)
 			checkLevel(t, tc.expLevel, logName, hclog.Info, l.Info, l.IsInfo)
