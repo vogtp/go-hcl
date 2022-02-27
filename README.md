@@ -35,9 +35,8 @@ func ExampleStdLibLikeLogging() {
 	hcl.Errorf("I am getting %s bored", "really")
 	hcl.Error("I got called with", "args", os.Args)
 
-	hcl.Warn("I am visible in build code")
 	hcl.Info("I am visible when started by go run")
-	hcl.Warn("I am visible when started by go test")
+	hcl.Warn("I am visible when started by go build")
 	hcl.Trace("I am not visible")
 	hcl.SetLevel(hclog.Trace)
 	hcl.Trace("now you can see me")
