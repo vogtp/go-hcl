@@ -2,6 +2,7 @@ package hcl
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	gologger "log"
 	"os"
@@ -354,3 +355,29 @@ func TestLibraryLogger(t *testing.T) {
 	assert.Equal(t, "", buf.Line())
 
 }
+
+func TestVlogCompat(t *testing.T) {
+	hcl := New(WithName("base"), WithLevel(hclog.Trace), WithWriter(&buf))
+	vl := hcl.Vlog()
+	vl.ErrorString("Test", "something")
+	assert.Equal(t, "[ERROR] base: Test something\n", buf.Line())
+
+	vl.Error(errors.New("Test err"))
+	assert.Equal(t, "[ERROR] base: Test err\n", buf.Line())
+
+	vl.Warn("Test", "something")
+	assert.Equal(t, "[WARN]  base: Test something\n", buf.Line())
+
+	vl.Info("Test", "something")
+	assert.Equal(t, "[INFO]  base: Test something\n", buf.Line())
+
+	vl.Debug("Test", "something")
+	assert.Equal(t, "[DEBUG] base: Test something\n", buf.Line())
+
+	
+	c:=vl.Trace("func")
+	assert.Equal(t, "[TRACE] base: START func\n", buf.Line())
+	c()
+	assert.Equal(t, "[TRACE] base: END func\n", buf.Line())
+}
+
