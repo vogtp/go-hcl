@@ -151,7 +151,7 @@ func WithLoggerOptions(opts *hclog.LoggerOptions) LoggerOpt {
 	}
 }
 
-// WithStdlib controlls if stdlib logger should be changed
+// WithStdlib controls if stdlib logger should be changed
 func WithStdlib(b bool) LoggerOpt {
 	return func(l *Logger) {
 		l.captureStdlib = b
